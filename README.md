@@ -4,7 +4,7 @@ This repository is intended to show you the configuration applied by me in neovi
 
 ## Packages indtalled to work pluggins
 
-***********Debian**
+**Debian**
 
 - sudo apt install xclip (clipboard)
 - sudo apt install ripgrep (Telescope)
