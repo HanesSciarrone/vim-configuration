@@ -8,6 +8,9 @@ This repository is intended to show you the configuration applied by me in neovi
 
 - sudo apt install xclip (clipboard)
 - sudo apt install ripgrep (Telescope)
+- sudo apt install python3-venv (nvim-lsp-installer)
+- sudo apt install clangd (lspconfig: clangd)
+- sudo apt install cmake (lspconfig: cmake)
 
 ## Font configuration
 

@@ -35,6 +35,11 @@ Plug 'nvim-lua/plenary.nvim'                                                    
 Plug 'nvim-telescope/telescope.nvim'                                            " Telescope
 Plug 'voldikss/vim-floaterm'                                                    " Allow has flow terminal
 Plug 'neovim/nvim-lspconfig'                                                    " Install LSP for navigation code
+Plug 'williamboman/nvim-lsp-installer'                                          " Installation of server LSP/Debugger/Other
+Plug 'hrsh7th/nvim-cmp'                                                         " Autocompleation (Autocompletion plugin)
+Plug 'hrsh7th/cmp-nvim-lsp'                                                     " Autocompleation (LSP source for nvim-cmp)
+Plug 'saadparwaiz1/cmp_luasnip'                                                 " Autocompleation (Snippets source for nvim-cmp)
+Plug 'L3MON4D3/LuaSnip'                                                         " Autocompleation (Snippets plugin)
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}                     " Install Treesitter for Highlighting
 
 call plug#end()
@@ -74,10 +79,63 @@ let g:floaterm_height = 0.6
 let g:floaterm_width = 0.85
 
 
+" Configure LSP-Installer
+lua << EOL
+require("nvim-lsp-installer").setup {}
+EOL
+
 " Configure LSP-config
 lua << EOL
-require('lspconfig').clangd.setup{}
-require'lspconfig'.cmake.setup{}
+local capabilities = vim.lsp.protocol.make_client_capabilities()
+capabilities = require('cmp_nvim_lsp').update_capabilities(capabilities)
+
+require('lspconfig').clangd.setup{
+    capabilities = capabilities,
+}
+require'lspconfig'.cmake.setup{
+    capabilities = capabilities,
+}
+EOL
+
+" Autocompleation configuration
+lua << EOL
+require('cmp').setup{
+    snippet = {
+    expand = function(args)
+      require('luasnip').lsp_expand(args.body)
+    end,
+    },
+    mapping = require('cmp').mapping.preset.insert({
+        ['<C-Space>'] = require('cmp').mapping.complete(),
+        ['<CR>'] = require('cmp').mapping.confirm {
+            behavior = require('cmp').ConfirmBehavior.Replace,
+            select = true,
+        },
+        ['<Tab>'] = require('cmp').mapping(
+        function(fallback)
+            if require('cmp').visible() then
+                require('cmp').select_next_item()
+            elseif require('luasnip').expand_or_jumpable() then
+                require('luasnip').expand_or_jump()
+            else
+                fallback()
+            end
+        end, { 'i', 's' }),
+        ['<S-Tab>'] = require('cmp').mapping(function(fallback)
+            if require('cmp').visible() then
+                require('cmp').select_prev_item()
+            elseif require('luasnip').jumpable(-1) then
+                require('luasnip').jump(-1)
+            else
+                fallback()
+            end
+        end, { 'i', 's' }),
+    }),
+    sources = {
+        { name = 'nvim_lsp' },
+        { name = 'luasnip' },
+    },
+}
 EOL
 
 " Treesitter
@@ -119,7 +177,7 @@ nnoremap <silent> <F12> :FloatermToggle<CR>
 tnoremap <silent> <F12> <C-\><C-n>:FloatermToggle<CR>
 
 " Option to navigate for file
-nnoremap <silent> <Leader>gd <cmd>lua vim.lsp.buf.declaration()<CR>
-nnoremap <silent> <Leader>gp <cmd>lua vim.lsp.buf.definition()<CR>
-nnoremap <silent> <Leader>gi <cmd>lua vim.lsp.buf.implementation()<CR>
-nnoremap <silent> <Leader>gr <cmd>lua vim.lsp.buf.references()<CR>
+nnoremap <silent> <Leader>gd <cmd>lua vim.lsp.buf.definition()<CR>
+nnoremap <silent> <Leader>gf <cmd>lua vim.lsp.buf.declaration()<CR>
+nnoremap <silent> <Leader>k <cmd>lua vim.lsp.buf.hover()<CR>
+
