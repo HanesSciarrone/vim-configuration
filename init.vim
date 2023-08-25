@@ -29,7 +29,8 @@ Plug 'APZelos/blamer.nvim'                                                      
 Plug 'Yggdroot/indentLine'                                                      " Vertical line at each indentation level for code indented with space
 
 "IDE
-Plug 'scrooloose/nerdtree'                                                      " Show tree of project directory
+Plug 'nvim-tree/nvim-web-devicons'                                              " Show icons in the treefile and bar file
+Plug 'nvim-tree/nvim-tree.lua'                                                  " Show tree of project directory
 Plug 'christoomey/vim-tmux-navigator'                                           " Navigate between files
 Plug 'nvim-lua/plenary.nvim'                                                    " Telescope
 Plug 'nvim-telescope/telescope.nvim'                                            " Telescope
@@ -41,6 +42,7 @@ Plug 'hrsh7th/cmp-nvim-lsp'                                                     
 Plug 'saadparwaiz1/cmp_luasnip'                                                 " Autocompleation (Snippets source for nvim-cmp)
 Plug 'L3MON4D3/LuaSnip'                                                         " Autocompleation (Snippets plugin)
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}                     " Install Treesitter for Highlighting
+Plug 'romgrk/barbar.nvim'                                                       " Allow have a lot bar file on top
 
 call plug#end()
 
@@ -67,17 +69,57 @@ let g:blamer_show_in_visual_mode = 0
 let g:blamer_show_in_insert_mode = 0
 let g:blamer_date_format = '%d/%m/%y'
 
-" Configuration NERDTree
-let NERDTreeWinSize = 31                                                        " Setup width windows to 31 columns
-let NERDTreeShowHidden = 1                                                      " Show the hidden file
-autocmd StdinReadPre * let s:std_in=1                                           " Start NERDTree when Vim is started without file arguments.
-autocmd VimEnter * if argc() == 0 && !exists('s:std_in') | NERDTree | endif     " Start NERDTree when Vim is started without file arguments.
+" Configuration Treefile
+lua << EOL
+-- disable netrw at the very start of your init.lua (strongly advised)
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
+
+require("nvim-tree").setup({
+    open_on_setup = true,
+    view = {
+        adaptive_size = false,
+        centralize_selection = false,
+        width = 31,
+        hide_root_folder = false,
+        side = "left",
+        preserve_window_proportions = false,
+        number = false,
+        relativenumber = false,
+        signcolumn = "yes",
+    },
+})
+EOL
+
+" Configuration Barbar
+let bufferline = get(g:, 'bufferline', {})  " NOTE: If barbar's option dict isn't created yet, create it
+let bufferline.icon_separator_active = '| '
+let bufferline.icon_separator_inactive = '| '
+lua << EOL
+local nvim_tree_events = require('nvim-tree.events')
+local bufferline_api = require('bufferline.api')
+
+local function get_tree_size()
+  return require'nvim-tree.view'.View.width
+end
+
+nvim_tree_events.subscribe('TreeOpen', function()
+  bufferline_api.set_offset(get_tree_size())
+end)
+
+nvim_tree_events.subscribe('Resize', function()
+  bufferline_api.set_offset(get_tree_size())
+end)
+
+nvim_tree_events.subscribe('TreeClose', function()
+  bufferline_api.set_offset(0)
+end)
+EOL
 
 " Configure Floaterm
 let g:floaterm_position = 'bottomright'
 let g:floaterm_height = 0.6
 let g:floaterm_width = 0.85
-
 
 " Configure LSP-Installer
 lua << EOL
@@ -86,13 +128,13 @@ EOL
 
 " Configure LSP-config
 lua << EOL
-local capabilities = vim.lsp.protocol.make_client_capabilities()
-capabilities = require('cmp_nvim_lsp').update_capabilities(capabilities)
+local capability = vim.lsp.protocol.make_client_capabilities()
+capabilities = require('cmp_nvim_lsp').default_capabilities(capability)
 
 require('lspconfig').clangd.setup{
     capabilities = capabilities,
 }
-require'lspconfig'.cmake.setup{
+require('lspconfig').cmake.setup{
     capabilities = capabilities,
 }
 EOL
@@ -165,8 +207,8 @@ map <Leader>q  :q<CR>
 map <Leader>wq :wq<CR>
 map <Leader>s  <C-\><C-n>
 
-" Open NERDTree
-nnoremap <silent>nt :NERDTreeToggle<CR>
+" Open Treefile
+nnoremap <silent>nt :NvimTreeToggle<CR>
 
 " Find files using Telescope command-line sugar.
 nnoremap <silent>ff <cmd>Telescope find_files<cr>
@@ -180,4 +222,8 @@ tnoremap <silent> <F12> <C-\><C-n>:FloatermToggle<CR>
 nnoremap <silent> <Leader>gd <cmd>lua vim.lsp.buf.definition()<CR>
 nnoremap <silent> <Leader>gf <cmd>lua vim.lsp.buf.declaration()<CR>
 nnoremap <silent> <Leader>k <cmd>lua vim.lsp.buf.hover()<CR>
+
+" Mapping for barbar
+nnoremap <silent>  <Leader>n <Cmd>BufferPrevious<CR>    " Move to previous/next
+nnoremap <silent>  <Leader>c <Cmd>BufferClose<CR>       " Close buffer
 
