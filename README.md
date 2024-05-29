@@ -1,33 +1,31 @@
 # vim-configuration
-This repository is intended to show you the configuration applied by me in neovim to use it as an C/C++ IDE.
+This repository is intended to show you the configuration applied by me in neovim to use it as an IDE.
 
 
 ## Packages indtalled to work pluggins
 
 **Debian**
 
-- sudo apt install xclip (clipboard)
-- sudo apt install ripgrep (Telescope)
-- sudo apt install python3-venv (nvim-lsp-installer)
-- sudo apt install clangd (lspconfig: clangd)
-- sudo apt install cmake (lspconfig: cmake)
+- sudo pacman -S xclip              (clipboard)
+- sudo pacman -S ripgrep            (Telescope)
+- sudo pacman -S python-virtualenv  (nvim-lsp-installer)
+- sudo pacman -S clangd             (lspconfig: clangd)
+- sudo pacman -S cmake              (lspconfig: cmake)
 
 ## Font configuration
 
 We have to install necessary font that neovim shows the symbols on the status bar, to do this please following the steps on this repository
 
-https://github.com/ryanoasis/nerd-fonts#font-installation
+sudo pacman -S ttf-hack-nerd
 
 ## Configuration jsonls
 
-The vscode-json-language-server isn't included in the build-in snippets of Neovim therefore we have to install the language server with **npm**. For install **npm** we should execute the command line:
+The vscode-json-language-server isn't included in the build-in snippets of Neovim therefore we have to install the language server with AUR repository*. 
 
 ```
-sudo apt install npm
+git clone https://aur.archlinux.org/vscode-langservers-extracted.git
+cd vscode-langservers-extracted
+makepkg
+sudo pacman -U vscode-langservers-extracted-4.10.0-1-any.pkg.tar.zst
 ```
 
-Then, we install the language server with 
-
-```
-npm i -g vscode-langservers-extracted
-```
