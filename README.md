@@ -9,7 +9,7 @@ This repository is intended to show you the configuration applied by me in neovi
 - sudo pacman -S xclip              (clipboard)
 - sudo pacman -S ripgrep            (Telescope)
 - sudo pacman -S python-virtualenv  (nvim-lsp-installer)
-- sudo pacman -S clangd             (lspconfig: clangd)
+- sudo pacman -S clang              (lspconfig: clang)
 - sudo pacman -S cmake              (lspconfig: cmake)
 
 ## Font configuration
